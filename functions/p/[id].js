@@ -85,6 +85,11 @@ function jsonSeguro(obj) {
   return JSON.stringify(obj).replace(/</g, '\\u003c');
 }
 
+// Para insertar texto dentro de comillas simples de un <script>
+function escapeJs(s) {
+  return String(s == null ? '' : s).replace(/[\\'"<>\n\r\u2028\u2029]/g, ' ');
+}
+
 function recortar(s, max) {
   s = String(s || '').replace(/\s+/g, ' ').trim();
   if (s.length <= max) return s;
@@ -219,6 +224,25 @@ export async function onRequestGet(context) {
 <link rel="canonical" href="${urlPropiedad}">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RP867VDQZP"></script>
+<script>
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());gtag('config','G-RP867VDQZP');
+window.tpiTrack=function(n,p){try{gtag('event',n,p||{});}catch(e){} try{ if(window.clarity&&(n==='whatsapp_click'||n==='generate_lead')) clarity('event',n); }catch(e){}};
+document.addEventListener('click',function(e){try{
+  var a=e.target.closest&&e.target.closest('a[href*="wa.me"]'); if(!a) return;
+  var h=a.getAttribute('href')||''; var m=''; try{m=decodeURIComponent(h);}catch(x){m=h;}
+  var ctx=/Coperholta/i.test(m)?'coperholta':(/Hola, estoy interesado|propiedad/i.test(m)?'propiedad':'general');
+  tpiTrack('whatsapp_click',{contexto:ctx,pagina:location.pathname});
+}catch(x){}},true);
+var _wo=window.open;window.open=function(u){try{if(typeof u==='string'&&u.indexOf('wa.me')>-1)tpiTrack('share_whatsapp',{});}catch(x){}return _wo.apply(window,arguments);};
+</script>
+<!-- Microsoft Clarity -->
+<script>
+(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","yzzvbnquj3");
+</script>
+<script>tpiTrack("view_item",{item_name:'${escapeJs(titulo)}',item_category:'${escapeJs(p.tipo || "")}'});</script>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="es_PE">

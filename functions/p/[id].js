@@ -229,7 +229,9 @@ export async function onRequestGet(context) {
 <script>
 window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
 gtag('js',new Date());gtag('config','G-RP867VDQZP');
-window.tpiTrack=function(n,p){try{gtag('event',n,p||{});}catch(e){} try{ if(window.clarity&&(n==='whatsapp_click'||n==='generate_lead')) clarity('event',n); }catch(e){}};
+window.tpiTrack=function(n,p){try{gtag('event',n,p||{});}catch(e){} try{ if(window.clarity&&(n==='whatsapp_click'||n==='generate_lead')) clarity('event',n); }catch(e){}
+  try{ if(window.fbq){ var _m={view_item:'ViewContent',view_coperholta:'ViewContent',whatsapp_click:'Contact',generate_lead:'Lead',search:'Search'}; if(_m[n]) fbq('track',_m[n],p||{}); else if(n==='sell_form_open') fbq('trackCustom','SellFormOpen',p||{}); } }catch(e){}
+};
 document.addEventListener('click',function(e){try{
   var a=e.target.closest&&e.target.closest('a[href*="wa.me"]'); if(!a) return;
   var h=a.getAttribute('href')||''; var m=''; try{m=decodeURIComponent(h);}catch(x){m=h;}
@@ -237,6 +239,11 @@ document.addEventListener('click',function(e){try{
   tpiTrack('whatsapp_click',{contexto:ctx,pagina:location.pathname});
 }catch(x){}},true);
 var _wo=window.open;window.open=function(u){try{if(typeof u==='string'&&u.indexOf('wa.me')>-1)tpiTrack('share_whatsapp',{});}catch(x){}return _wo.apply(window,arguments);};
+</script>
+<!-- Meta Pixel -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','1422784539374676');fbq('track','PageView');
 </script>
 <!-- Microsoft Clarity -->
 <script>

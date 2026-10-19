@@ -25,7 +25,9 @@ export async function onRequestGet() {
 
   const urls = [
     '  <url><loc>' + SITE_URL + '/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>'
-  ].concat(filas.map(f => {
+  ].concat(['/terrenos-en-tarapoto', '/casas-en-venta-tarapoto', '/alquiler-en-tarapoto', '/lotes-en-tarapoto', '/alquiler-de-casas-en-tarapoto', '/alquiler-de-oficinas-en-tarapoto', '/alquiler-de-edificios-en-tarapoto', '/hoteles-en-tarapoto', '/casas-en-tarapoto', '/alquiler-de-locales-comerciales-en-tarapoto', '/venta-de-locales-comerciales-en-tarapoto', '/venta-de-oficinas-en-tarapoto', '/venta-de-hoteles-en-tarapoto', '/alquiler-de-hoteles-en-tarapoto', '/alquiler-de-terrenos-en-tarapoto'].map(c =>
+    '  <url><loc>' + SITE_URL + c + '</loc><changefreq>daily</changefreq><priority>0.9</priority></url>'
+  )).concat(filas.map(f => {
     const lm = f.created_at ? '<lastmod>' + esc(String(f.created_at).slice(0, 10)) + '</lastmod>' : '';
     return '  <url><loc>' + SITE_URL + '/p/' + esc(encodeURIComponent(f.id)) + '</loc>' + lm +
            '<changefreq>weekly</changefreq><priority>0.8</priority></url>';

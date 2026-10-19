@@ -1,0 +1,25 @@
+# Tarapoto Inmuebles
+
+> Portal inmobiliario de Tarapoto, San Martín, Perú. Terrenos, lotes, casas, oficinas, locales y edificios en venta y alquiler, con fotos reales y atención directa por WhatsApp.
+
+Oficina: Jr. Moyobamba 166, Tarapoto (a media cuadra de la Plaza de Armas). WhatsApp: +51 992 226 283. Web: https://tarapotoinmuebles.pe
+
+## Categorías
+- [Terrenos en venta en Tarapoto](https://tarapotoinmuebles.pe/terrenos-en-tarapoto)
+- [Casas en venta en Tarapoto](https://tarapotoinmuebles.pe/casas-en-venta-tarapoto)
+- [Alquiler en Tarapoto](https://tarapotoinmuebles.pe/alquiler-en-tarapoto)
+- [Alquiler de casas en Tarapoto](https://tarapotoinmuebles.pe/alquiler-de-casas-en-tarapoto)
+- [Alquiler de oficinas en Tarapoto](https://tarapotoinmuebles.pe/alquiler-de-oficinas-en-tarapoto)
+- [Alquiler de edificios y locales en Tarapoto](https://tarapotoinmuebles.pe/alquiler-de-edificios-en-tarapoto)
+- [Lotes y proyectos en Tarapoto](https://tarapotoinmuebles.pe/lotes-en-tarapoto)
+- [Hoteles en venta y alquiler en Tarapoto](https://tarapotoinmuebles.pe/hoteles-en-tarapoto)
+- [Casas en Tarapoto](https://tarapotoinmuebles.pe/casas-en-tarapoto)
+- [Locales comerciales en alquiler](https://tarapotoinmuebles.pe/alquiler-de-locales-comerciales-en-tarapoto)
+- [Locales comerciales en venta](https://tarapotoinmuebles.pe/venta-de-locales-comerciales-en-tarapoto)
+- [Oficinas en venta](https://tarapotoinmuebles.pe/venta-de-oficinas-en-tarapoto)
+- [Hoteles en venta](https://tarapotoinmuebles.pe/venta-de-hoteles-en-tarapoto)
+- [Hoteles en alquiler](https://tarapotoinmuebles.pe/alquiler-de-hoteles-en-tarapoto)
+- [Terrenos en alquiler](https://tarapotoinmuebles.pe/alquiler-de-terrenos-en-tarapoto)
+
+## Listado completo
+- [Sitemap con todas las propiedades](https://tarapotoinmuebles.pe/sitemap.xml)

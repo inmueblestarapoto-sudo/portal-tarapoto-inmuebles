@@ -82,7 +82,8 @@ export function cargarTodosLosLotes() {
 const TRACKING = '<script async src="https://www.googletagmanager.com/gtag/js?id=' + GA_ID + '"></script>' +
 '<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","' + GA_ID + '");' +
 'window.tpiTrack=function(n,p){try{gtag("event",n,p||{});}catch(e){} try{if(window.clarity&&n==="whatsapp_click")clarity("event",n);}catch(e){}};' +
-'document.addEventListener("click",function(e){try{var a=e.target.closest&&e.target.closest("a[href*=\\"wa.me\\"]");if(!a)return;tpiTrack("whatsapp_click",{contexto:"categoria",pagina:location.pathname});}catch(x){}},true);</script>' +
+'document.addEventListener("click",function(e){try{var a=e.target.closest&&e.target.closest("a[href*=\\"wa.me\\"]");if(!a)return;tpiTrack("whatsapp_click",{contexto:"categoria",pagina:location.pathname});try{fbq("track","Contact");}catch(z){}}catch(x){}},true);</script>' +
+'<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version="2.0";n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,"script","https://connect.facebook.net/en_US/fbevents.js");fbq("init","1422784539374676");fbq("track","PageView");</script>' +
 '<script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","' + CLARITY_ID + '");</script>';
 
 const CSS = `

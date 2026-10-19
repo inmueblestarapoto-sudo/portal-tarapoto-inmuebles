@@ -28,6 +28,26 @@ const CARACT_SINONIMOS = {
   cocheras: ['cocheras', 'cochera', 'garage', 'garages', 'garaje', 'garajes', 'estacionamiento', 'estacionamientos'],
   piscina: ['piscina', 'piscinas']
 };
+
+// Nombre legible del tipo de propiedad (para título, descripción y datos estructurados)
+const TIPO_LABELS = {
+  casa_venta: 'Casa en venta',
+  casa_alquiler: 'Casa en alquiler',
+  terreno_venta: 'Terreno en venta',
+  terreno_alquiler: 'Terreno en alquiler',
+  local_comercial_venta: 'Local comercial en venta',
+  local_comercial_alquiler: 'Local comercial en alquiler',
+  oficina_venta: 'Oficina en venta',
+  oficina_alquiler: 'Oficina en alquiler',
+  hotel_venta: 'Hotel en venta',
+  hotel_alquiler: 'Hotel en alquiler'
+};
+function tipoLabel(tipo) {
+  if (TIPO_LABELS[tipo]) return TIPO_LABELS[tipo];
+  const t = String(tipo || '').replace(/_/g, ' ').trim();
+  return t ? t.charAt(0).toUpperCase() + t.slice(1) : 'Propiedad';
+}
+
 function normalizarCaractTexto(s) {
   return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
 }
@@ -60,6 +80,17 @@ function escapeHtml(s) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+// Para incrustar JSON dentro de <script>: evita cerrar la etiqueta por accidente
+function jsonSeguro(obj) {
+  return JSON.stringify(obj).replace(/</g, '\\u003c');
+}
+
+function recortar(s, max) {
+  s = String(s || '').replace(/\s+/g, ' ').trim();
+  if (s.length <= max) return s;
+  return s.slice(0, max - 1).replace(/\s+\S*$/, '') + '…';
+}
+
 function money(n, moneda) {
   const simbolo = moneda === 'PEN' ? 'S/' : '$';
   return simbolo + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -70,6 +101,7 @@ function paginaNoDisponible() {
 <title>Propiedad no disponible - Tarapoto Inmuebles</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="any">
 </head><body style="font-family:sans-serif;text-align:center;padding:60px 20px;">
 <h1>Esta propiedad ya no está disponible</h1>
 <p><a href="${SITE_URL}/">Ver todas las propiedades en Tarapoto Inmuebles →</a></p>
@@ -100,7 +132,8 @@ export async function onRequestGet(context) {
 
   const p = propiedad;
   const esAlquiler = (p.tipo || '').indexOf('alquiler') !== -1;
-  const titulo = p.titulo || 'Propiedad en Tarapoto';
+  const tipoTxt = tipoLabel(p.tipo);
+  const titulo = p.titulo || (tipoTxt + ' en Tarapoto');
   const precioTxt = money(p.precio_real, p.moneda) + ' ' + (p.moneda === 'PEN' ? 'soles' : 'dólares');
   const metrosTxt = (p.metros || '—') + ' ' + (p.unidad_metros || 'm²');
   const parsed = parseCaracteristicasTexto(p.caracteristicas || '');
@@ -108,32 +141,104 @@ export async function onRequestGet(context) {
     .filter(c => (parsed.counts[c.key] || 0) > 0)
     .map(c => `<div class="chip"><span class="icon">${c.icon}</span><span>${parsed.counts[c.key]} ${c.label}</span></div>`)
     .join('');
-  const descripcionCorta = (p.descripcion || p.destacados || ('Propiedad ' + (esAlquiler ? 'en alquiler' : 'en venta') + ' en Tarapoto, ' + metrosTxt + '.')).slice(0, 200);
+
+  // --- SEO: título y descripción pensados para lo que la gente busca en Google ---
+  // Ej: "Local comercial en alquiler en Tarapoto – Local comercial plaza"
+  const seoTitle = recortar(tipoTxt + ' en Tarapoto – ' + titulo, 65);
+  const base = p.descripcion || p.destacados || '';
+  const seoDesc = recortar(
+    tipoTxt + ' en Tarapoto, ' + metrosTxt + '. ' + precioTxt + '. ' +
+    (p.referencia ? p.referencia + '. ' : '') + base +
+    ' Escríbenos por WhatsApp.',
+    158
+  );
+  const descripcionCorta = seoDesc;
+
   const foto = p.foto_principal || '';
+  const secundarias = (Array.isArray(p.fotos_secundarias) ? p.fotos_secundarias : []).filter(Boolean).slice(0, 4);
+  const todasFotos = (foto ? [foto] : []).concat(secundarias);
   const urlPropiedad = SITE_URL + '/p/' + p.id;
   const whatsappMsg = encodeURIComponent('Hola, estoy interesado en la propiedad "' + titulo + '" que vi en ' + urlPropiedad + '. Quería más información.');
+
+  // --- Datos estructurados (schema.org) ---
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'RealEstateListing',
+        '@id': urlPropiedad + '#listing',
+        url: urlPropiedad,
+        name: titulo,
+        description: recortar(base || seoDesc, 300),
+        image: todasFotos,
+        datePosted: p.created_at || undefined,
+        inLanguage: 'es-PE',
+        about: {
+          '@type': 'Accommodation',
+          name: tipoTxt,
+          floorSize: p.metros ? { '@type': 'QuantitativeValue', value: Number(p.metros) || undefined, unitCode: 'MTK' } : undefined,
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: 'Tarapoto',
+            addressRegion: 'San Martín',
+            addressCountry: 'PE',
+            streetAddress: p.referencia || undefined
+          }
+        },
+        offers: {
+          '@type': 'Offer',
+          price: Number(p.precio_real) || undefined,
+          priceCurrency: p.moneda === 'PEN' ? 'PEN' : 'USD',
+          availability: 'https://schema.org/InStock',
+          businessFunction: esAlquiler ? 'http://purl.org/goodrelations/v1#LeaseOut' : 'http://purl.org/goodrelations/v1#Sell',
+          seller: { '@type': 'RealEstateAgent', name: 'Tarapoto Inmuebles', url: SITE_URL + '/', telephone: '+' + WHATSAPP_NUMBER }
+        }
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Tarapoto Inmuebles', item: SITE_URL + '/' },
+          { '@type': 'ListItem', position: 2, name: titulo, item: urlPropiedad }
+        ]
+      }
+    ]
+  };
+
+  const galeria = secundarias.length
+    ? `<div class="galeria">${secundarias.map((u, i) => `<img src="${escapeHtml(u)}" alt="${escapeHtml(titulo + ' - foto ' + (i + 2))}" loading="lazy">`).join('')}</div>`
+    : '';
 
   const html = `<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapeHtml(titulo)} - Tarapoto Inmuebles</title>
+<title>${escapeHtml(seoTitle)}</title>
 <meta name="description" content="${escapeHtml(descripcionCorta)}">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="${urlPropiedad}">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta property="og:type" content="website">
+<meta property="og:locale" content="es_PE">
 <meta property="og:site_name" content="Tarapoto Inmuebles">
-<meta property="og:title" content="${escapeHtml(titulo)}">
+<meta property="og:title" content="${escapeHtml(titulo)} – ${escapeHtml(tipoTxt)}">
 <meta property="og:description" content="${escapeHtml(descripcionCorta)}">
 <meta property="og:url" content="${urlPropiedad}">
 ${foto ? `<meta property="og:image" content="${escapeHtml(foto)}">` : ''}
 <meta name="twitter:card" content="${foto ? 'summary_large_image' : 'summary'}">
-<meta name="twitter:title" content="${escapeHtml(titulo)}">
+<meta name="twitter:title" content="${escapeHtml(titulo)} – ${escapeHtml(tipoTxt)}">
 <meta name="twitter:description" content="${escapeHtml(descripcionCorta)}">
 ${foto ? `<meta name="twitter:image" content="${escapeHtml(foto)}">` : ''}
+<script type="application/ld+json">${jsonSeguro(jsonLd)}</script>
 <style>
   body{font-family:'Segoe UI',Arial,sans-serif;background:#DCD5C6;color:#16324A;margin:0;padding:0;}
   .wrap{max-width:600px;margin:0 auto;background:#fff;min-height:100vh;}
+  .top{display:block;padding:12px 20px;background:#16324A;color:#fff;text-decoration:none;font-weight:700;font-size:15px;}
   .foto{width:100%;aspect-ratio:4/3;object-fit:cover;background:#eee;display:block;}
+  .galeria{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;margin-top:4px;}
+  .galeria img{width:100%;aspect-ratio:4/3;object-fit:cover;background:#eee;display:block;}
   .body{padding:20px;}
   .tag{display:inline-block;background:#16324A;color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;margin-bottom:10px;}
   h1{font-size:22px;margin:6px 0;}
@@ -148,15 +253,18 @@ ${foto ? `<meta name="twitter:image" content="${escapeHtml(foto)}">` : ''}
   .cta a{flex:1;text-align:center;padding:14px;border-radius:10px;font-weight:800;text-decoration:none;font-size:14.5px;}
   .cta .wsp{background:#25D366;color:#fff;}
   .cta .ver{background:#16324A;color:#fff;}
+  .mas{display:block;text-align:center;margin:22px 0 6px;color:#16324A;font-weight:700;font-size:14px;}
 </style>
 </head>
 <body>
 <div class="wrap">
-  ${foto ? `<img class="foto" src="${escapeHtml(foto)}" alt="${escapeHtml(titulo)}">` : ''}
+  <a class="top" href="${SITE_URL}/">← Tarapoto Inmuebles · Todas las propiedades</a>
+  ${foto ? `<img class="foto" src="${escapeHtml(foto)}" alt="${escapeHtml(titulo + ' - ' + tipoTxt + ' en Tarapoto')}">` : ''}
+  ${galeria}
   <div class="body">
     <span class="tag">${esAlquiler ? 'Alquiler' : 'Venta'}</span>
     <h1>${escapeHtml(titulo)}</h1>
-    <div class="metros">${escapeHtml(metrosTxt)}</div>
+    <div class="metros">${escapeHtml(tipoTxt)} en Tarapoto · ${escapeHtml(metrosTxt)}</div>
     <div class="precio">${precioTxt}</div>
     ${p.descripcion ? `<div class="section-title">Descripción</div><div class="text">${escapeHtml(p.descripcion)}</div>` : ''}
     ${chips ? `<div class="section-title">Características</div><div class="chips">${chips}</div>` : ''}
@@ -166,6 +274,7 @@ ${foto ? `<meta name="twitter:image" content="${escapeHtml(foto)}">` : ''}
       <a class="wsp" href="https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMsg}">💬 Escribir por WhatsApp</a>
       <a class="ver" href="${SITE_URL}/?propiedad=${p.id}">Ver todos los detalles →</a>
     </div>
+    <a class="mas" href="${SITE_URL}/">Ver más propiedades en Tarapoto →</a>
   </div>
 </div>
 </body>

@@ -9,6 +9,24 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="canonical" href="https://tarapotoinmuebles.pe/">
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RP867VDQZP"></script>
+<script>
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());gtag('config','G-RP867VDQZP');
+window.tpiTrack=function(n,p){try{gtag('event',n,p||{});}catch(e){} try{ if(window.clarity&&(n==='whatsapp_click'||n==='generate_lead')) clarity('event',n); }catch(e){}};
+document.addEventListener('click',function(e){try{
+  var a=e.target.closest&&e.target.closest('a[href*="wa.me"]'); if(!a) return;
+  var h=a.getAttribute('href')||''; var m=''; try{m=decodeURIComponent(h);}catch(x){m=h;}
+  var ctx=/Coperholta/i.test(m)?'coperholta':(/Hola, estoy interesado|propiedad/i.test(m)?'propiedad':'general');
+  tpiTrack('whatsapp_click',{contexto:ctx,pagina:location.pathname});
+}catch(x){}},true);
+var _wo=window.open;window.open=function(u){try{if(typeof u==='string'&&u.indexOf('wa.me')>-1)tpiTrack('share_whatsapp',{});}catch(x){}return _wo.apply(window,arguments);};
+</script>
+<!-- Microsoft Clarity -->
+<script>
+(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","yzzvbnquj3");
+</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Tarapoto Inmuebles">
@@ -603,6 +621,7 @@
   }
 
   function openPublicDetail(p){
+    try{ tpiTrack("view_item",{item_name:p.titulo||"",item_category:p.tipo||""}); }catch(e){}
     const secundarias = (p.fotos_secundarias||[]).slice(0,4);
     const galeria = [p.foto_principal].concat(secundarias).filter(Boolean);
     const fotoHtml = p.foto_principal ? '<img src="'+p.foto_principal+'" alt=""/>' : '';
@@ -768,6 +787,7 @@
   }
 
   function mostrarResultadosFiltrados(){
+    try{ tpiTrack('search',{tipos:(pendingTipos||[]).join(','),moneda:pendingMoneda||''}); }catch(e){}
     flowRoot.innerHTML = '';
     const filtradas = properties.filter(function(p){
       return pendingTipos.indexOf(p.tipo) !== -1 && (p.moneda||'PEN') === pendingMoneda && p.precio_real >= pendingMin && p.precio_real <= pendingMax;
@@ -873,6 +893,7 @@
 
   function openSellForm(tipoOperacion){
     tipoOperacion = tipoOperacion || 'venta';
+    try{ tpiTrack('sell_form_open',{operacion:tipoOperacion}); }catch(e){}
     const esAlquiler = tipoOperacion === 'alquiler';
     const counts = {};
     CARACT_COUNTERS.forEach(c => counts[c.key] = 0);
@@ -1118,6 +1139,7 @@
       try{
         const ok = await sbInsert('propiedades', propiedad);
         if(ok){
+          try{ tpiTrack('generate_lead',{lead_type:'vende_propiedad'}); }catch(e){}
           try{
             await sbInsert('clientes', {
               id: Date.now()+'-'+Math.random().toString(36).slice(2,7),
@@ -1583,6 +1605,7 @@
 
   function abrirPlano(n){
     if (overlayAbierto){ if (n) seleccionar(n, false); return; }
+    try{ tpiTrack('view_coperholta',{lote:n||0}); }catch(e){}
     ultimoFoco = document.activeElement;
     overlayAbierto = true;
     seleccionado = null; modo = 'plano';
